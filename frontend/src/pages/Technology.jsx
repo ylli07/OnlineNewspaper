@@ -39,6 +39,34 @@ export default function Technology() {
           </div>
         ))}
       </div>
+      <footer style={styles.footer}>
+        <div style={styles.footerContent}>
+          <div style={styles.footerSection}>
+            <h3 style={styles.footerTitle}>About Us</h3>
+            <p style={styles.footerText}>Your trusted source for the latest news and updates from around the world.</p>
+          </div>
+          <div style={styles.footerSection}>
+            <h3 style={styles.footerTitle}>Quick Links</h3>
+            <ul style={styles.footerLinks}>
+              <li style={styles.footerLinkItem}>Contact Us</li>
+              <li style={styles.footerLinkItem}>Privacy Policy</li>
+              <li style={styles.footerLinkItem}>Terms of Service</li>
+              <li style={styles.footerLinkItem}>Advertise</li>
+            </ul>
+          </div>
+          <div style={styles.footerSection}>
+            <h3 style={styles.footerTitle}>Follow Us</h3>
+            <div style={styles.socialLinks}>
+              <span style={styles.socialIcon}>Facebook</span>
+              <span style={styles.socialIcon}>Twitter</span>
+              <span style={styles.socialIcon}>Instagram</span>
+            </div>
+          </div>
+        </div>
+        <div style={styles.footerBottom}>
+          <p style={styles.copyright}>&copy; 2024 Online Newspaper. All rights reserved.</p>
+        </div>
+      </footer>
     </div>
   );
 }
@@ -106,5 +134,49 @@ const styles = {
     fontSize: '1.5rem',
     color: '#2c3e50',
     cursor: 'pointer',
+  },
+  footer: {
+    backgroundColor: '#1a1a1a',
+    padding: '2rem',
+    marginTop: 'auto',
+  },
+  footerContent: {
+    display: 'flex',
+    justifyContent: 'space-between',
+  },
+  footerSection: {
+    flex: 1,
+  },
+  footerTitle: {
+    fontSize: '1.5rem',
+    color: '#fff',
+    marginBottom: '1rem',
+  },
+  footerText: {
+    color: '#fff',
+    lineHeight: '1.6',
+  },
+  footerLinks: {
+    listStyle: 'none',
+    padding: 0,
+  },
+  footerLinkItem: {
+    color: '#fff',
+    marginBottom: '0.5rem',
+  },
+  socialLinks: {
+    display: 'flex',
+    gap: '1rem',
+  },
+  socialIcon: {
+    color: '#fff',
+    cursor: 'pointer',
+  },
+  footerBottom: {
+    textAlign: 'center',
+    marginTop: '2rem',
+  },
+  copyright: {
+    color: '#fff',
   },
 }; 
