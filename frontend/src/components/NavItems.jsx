@@ -20,9 +20,14 @@ const NavItems = () => {
           </li>
         ))}
       </ul>
-      <Link to="/login" style={styles.loginButton}>
-        Login
-      </Link>
+      <div style={styles.authButtons}>
+        <Link to="/login" style={styles.loginButton}>
+          Login
+        </Link>
+        <Link to="/signup" style={styles.signupButton}>
+          Sign Up
+        </Link>
+      </div>
     </div>
   );
 };
@@ -67,6 +72,10 @@ const styles = {
       color: '#3498db',
     },
   },
+  authButtons: {
+    display: 'flex',
+    gap: '1rem',
+  },
   loginButton: {
     backgroundColor: '#3498db',
     color: '#fff',
@@ -80,6 +89,21 @@ const styles = {
     '&:hover': {
       backgroundColor: 'transparent',
       color: '#3498db',
+    },
+  },
+  signupButton: {
+    backgroundColor: 'transparent',
+    color: '#3498db',
+    padding: '0.6rem 1.5rem',
+    borderRadius: '25px',
+    textDecoration: 'none',
+    fontSize: '1rem',
+    fontWeight: '500',
+    transition: 'all 0.3s ease',
+    border: '2px solid #3498db',
+    '&:hover': {
+      backgroundColor: '#3498db',
+      color: '#fff',
     },
   },
 };

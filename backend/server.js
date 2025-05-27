@@ -8,6 +8,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Import routes
+const authRoutes = require('./routes/auth');
+
 // MySQL connection
 const db = mysql.createConnection({
   host: process.env.DB_HOST,       // localhost
@@ -23,6 +26,9 @@ db.connect(err => {
   }
   console.log('Connected to MySQL database.');
 });
+
+// Use routes
+app.use('/api/auth', authRoutes);
 
 // Simple test route
 app.get('/', (req, res) => {

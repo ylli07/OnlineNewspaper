@@ -79,7 +79,7 @@ const Login = () => {
 
             <div style={styles.registerLink}>
               Don't have an account?{' '}
-              <Link to="/register" style={styles.link}>
+              <Link to="/signup" style={styles.link}>
                 Register here
               </Link>
             </div>
