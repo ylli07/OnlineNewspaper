@@ -52,6 +52,7 @@ const Signup = () => {
 
   return (
     <div style={styles.container}>
+      <button onClick={() => window.history.back()} style={styles.backButton}>←</button>
       <form onSubmit={handleSubmit} style={styles.form}>
         <h2 style={styles.title}>Sign Up</h2>
         {error && <div style={styles.error}>{error}</div>}
@@ -159,6 +160,17 @@ const styles = {
     color: '#e74c3c',
     marginBottom: '1rem',
     textAlign: 'center',
+  },
+  backButton: {
+    position: 'absolute',
+    top: '1rem',
+    left: '1rem',
+    padding: '0.5rem 1rem',
+    backgroundColor: '#3498db',
+    color: 'white',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
   },
 };
 
