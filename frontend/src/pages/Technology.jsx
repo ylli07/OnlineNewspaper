@@ -12,7 +12,16 @@ export default function Technology() {
 
   return (
     <div style={styles.container}>
+      <button onClick={() => window.history.back()} style={styles.backButton}>←</button>
       <h1 style={styles.title}>Technology News</h1>
+      <div style={styles.imageContainer}>
+        <img src="/path/to/image1.jpg" alt="Technology Image 1" style={styles.image} />
+        <img src="/path/to/image2.jpg" alt="Technology Image 2" style={styles.image} />
+      </div>
+      <div style={styles.descriptionContainer}>
+        <h3>About Technology</h3>
+        <p>Write something about technology here...</p>
+      </div>
       <div style={styles.newsGrid}>
         {news.map(({ id, title, summary, imageUrl }) => (
           <div key={id} style={styles.newsCard}>
@@ -62,13 +71,14 @@ const styles = {
     },
   },
   imageContainer: {
-    width: '100%',
-    height: '200px',
-    overflow: 'hidden',
+    display: 'flex',
+    justifyContent: 'center',
+    gap: '1rem',
+    marginBottom: '1rem',
   },
   image: {
-    width: '100%',
-    height: '100%',
+    width: '45%',
+    height: 'auto',
     objectFit: 'cover',
   },
   content: {
@@ -82,5 +92,19 @@ const styles = {
   summary: {
     color: '#666',
     lineHeight: '1.6',
+  },
+  descriptionContainer: {
+    textAlign: 'center',
+    marginBottom: '2rem',
+  },
+  backButton: {
+    position: 'absolute',
+    top: '1rem',
+    left: '1rem',
+    background: 'none',
+    border: 'none',
+    fontSize: '1.5rem',
+    color: '#2c3e50',
+    cursor: 'pointer',
   },
 }; 
