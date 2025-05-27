@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const NavItems = () => {
   const navItems = [
@@ -12,7 +13,9 @@ const NavItems = () => {
     <ul style={styles.navLinks}>
       {navItems.map(item => (
         <li key={item.id} style={styles.navItem}>
-          {item.name}
+          <Link to={item.path} style={styles.link}>
+            {item.name}
+          </Link>
         </li>
       ))}
     </ul>
@@ -24,12 +27,16 @@ const styles = {
     listStyle: 'none',
     display: 'flex',
     gap: '2rem',
-    cursor: 'pointer',
     margin: 0,
     padding: 0,
   },
   navItem: {
     userSelect: 'none',
+  },
+  link: {
+    color: '#ecf0f1',
+    textDecoration: 'none',
+    fontSize: '1.1rem',
     transition: 'color 0.3s ease',
     '&:hover': {
       color: '#3498db',
