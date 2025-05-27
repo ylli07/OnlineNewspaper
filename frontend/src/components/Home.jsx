@@ -20,7 +20,10 @@ export default function Home() {
     <>
       {/* Navbar */}
       <nav style={styles.nav}>
-        <div style={styles.logo}>Online Newspaper</div>
+        <div style={styles.logo}>
+          <span style={styles.logoText}>Online</span>
+          <span style={styles.logoHighlight}>Newspaper</span>
+        </div>
         <NavItems />
       </nav>
 
@@ -84,15 +87,15 @@ export default function Home() {
         <div style={styles.footerContent}>
           <div style={styles.footerSection}>
             <h3 style={styles.footerTitle}>About Us</h3>
-            <p>Your trusted source for the latest news and updates from around the world.</p>
+            <p style={styles.footerText}>Your trusted source for the latest news and updates from around the world.</p>
           </div>
           <div style={styles.footerSection}>
             <h3 style={styles.footerTitle}>Quick Links</h3>
             <ul style={styles.footerLinks}>
-              <li>Contact Us</li>
-              <li>Privacy Policy</li>
-              <li>Terms of Service</li>
-              <li>Advertise</li>
+              <li style={styles.footerLinkItem}>Contact Us</li>
+              <li style={styles.footerLinkItem}>Privacy Policy</li>
+              <li style={styles.footerLinkItem}>Terms of Service</li>
+              <li style={styles.footerLinkItem}>Advertise</li>
             </ul>
           </div>
           <div style={styles.footerSection}>
@@ -105,7 +108,7 @@ export default function Home() {
           </div>
         </div>
         <div style={styles.footerBottom}>
-          <p>&copy; 2024 Online Newspaper. All rights reserved.</p>
+          <p style={styles.copyright}>&copy; 2024 Online Newspaper. All rights reserved.</p>
         </div>
       </footer>
     </>
@@ -116,17 +119,26 @@ const styles = {
   nav: {
     display: 'flex',
     justifyContent: 'space-between',
-    padding: '1rem 3rem',
-    backgroundColor: '#2c3e50',
+    padding: '1rem 4rem',
+    backgroundColor: '#1a1a1a',
     color: '#ecf0f1',
     alignItems: 'center',
     position: 'sticky',
     top: 0,
     zIndex: 100,
+    boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
   },
   logo: {
     fontSize: '1.8rem',
     fontWeight: 'bold',
+    display: 'flex',
+    gap: '0.5rem',
+  },
+  logoText: {
+    color: '#ecf0f1',
+  },
+  logoHighlight: {
+    color: '#3498db',
   },
   main: {
     padding: '2rem 4rem',
@@ -231,42 +243,81 @@ const styles = {
     margin: 0,
   },
   footer: {
-    backgroundColor: '#2c3e50',
+    backgroundColor: '#1a1a1a',
     color: '#ecf0f1',
-    padding: '3rem 4rem 1rem',
+    padding: '4rem 4rem 1rem',
+    marginTop: '4rem',
   },
   footerContent: {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-    gap: '2rem',
-    marginBottom: '2rem',
+    gap: '3rem',
+    marginBottom: '3rem',
+    maxWidth: '1200px',
+    margin: '0 auto 3rem',
   },
   footerSection: {
     marginBottom: '1.5rem',
   },
   footerTitle: {
-    fontSize: '1.2rem',
-    marginBottom: '1rem',
+    fontSize: '1.4rem',
+    marginBottom: '1.5rem',
     color: '#3498db',
+    fontWeight: '600',
+    position: 'relative',
+    paddingBottom: '0.5rem',
+    '&::after': {
+      content: '""',
+      position: 'absolute',
+      left: 0,
+      bottom: 0,
+      width: '50px',
+      height: '2px',
+      backgroundColor: '#3498db',
+    },
+  },
+  footerText: {
+    color: '#bdc3c7',
+    lineHeight: '1.6',
+    fontSize: '1rem',
   },
   footerLinks: {
     listStyle: 'none',
     padding: 0,
     margin: 0,
   },
+  footerLinkItem: {
+    marginBottom: '1rem',
+    cursor: 'pointer',
+    color: '#bdc3c7',
+    transition: 'all 0.3s ease',
+    fontSize: '1rem',
+    '&:hover': {
+      color: '#3498db',
+      transform: 'translateX(5px)',
+    },
+  },
   socialLinks: {
     display: 'flex',
-    gap: '1rem',
+    gap: '1.5rem',
   },
   socialIcon: {
     cursor: 'pointer',
+    color: '#bdc3c7',
+    transition: 'all 0.3s ease',
+    fontSize: '1rem',
     '&:hover': {
       color: '#3498db',
+      transform: 'translateY(-3px)',
     },
   },
   footerBottom: {
     textAlign: 'center',
     paddingTop: '2rem',
     borderTop: '1px solid rgba(255,255,255,0.1)',
+  },
+  copyright: {
+    color: '#bdc3c7',
+    fontSize: '0.9rem',
   },
 };
