@@ -28,7 +28,8 @@ const Signup = () => {
     }
 
     try {
-      const response = await fetch('/api/auth/signup', {
+      // Signup request
+      const response = await fetch('http://localhost:5000/api/auth/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -42,7 +43,28 @@ const Signup = () => {
       const data = await response.json();
 
       if (response.ok) {
-        navigate('/login');
+        // After successful signup, automatically log in
+        const loginResponse = await fetch('http://localhost:5000/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username: formData.username,
+            password: formData.password,
+          }),
+        });
+
+        const loginData = await loginResponse.json();
+
+        if (loginResponse.ok) {
+          // Store the token
+          localStorage.setItem('token', loginData.token);
+          // Redirect to home page
+          navigate('/');
+        } else {
+          setError(loginData.message || 'Login failed after signup');
+        }
       } else {
         setError(data.message || 'Signup failed');
       }
@@ -215,6 +237,7 @@ const styles = {
     backgroundColor: '#fde8e8',
     padding: '0.5rem',
     borderRadius: '5px',
+    marginBottom: '1rem',
   },
   submitButton: {
     backgroundColor: '#3498db',

@@ -10,6 +10,7 @@ app.use(express.json());
 
 // Import routes
 const authRoutes = require('./routes/auth');
+const authMiddleware = require('./middleware/auth');
 
 // MySQL connection
 const db = mysql.createConnection({
@@ -30,6 +31,10 @@ db.connect(err => {
 // Use routes
 app.use('/api/auth', authRoutes);
 
+// Protected routes
+app.use('/api/auth/logout', authMiddleware);
+app.use('/api/news', authMiddleware); // Protect news routes
+
 // Simple test route
 app.get('/', (req, res) => {
   res.send('Backend is running');
@@ -45,6 +50,36 @@ app.get('/articles', (req, res) => {
       res.json(results);
     }
   });
+});
+
+// Add this after your existing routes
+app.get('/api/news', (req, res) => {
+  // Sample news data
+  const news = [
+    {
+      id: 1,
+      title: 'Breaking News Story',
+      summary: 'This is a sample news story',
+      category: 'World',
+      imageUrl: 'https://via.placeholder.com/400x250'
+    },
+    {
+      id: 2,
+      title: 'Sports Update',
+      summary: 'Latest sports news and updates',
+      category: 'Sports',
+      imageUrl: 'https://via.placeholder.com/400x250'
+    },
+    {
+      id: 3,
+      title: 'Technology News',
+      summary: 'Latest in technology',
+      category: 'Technology',
+      imageUrl: 'https://via.placeholder.com/400x250'
+    }
+  ];
+  
+  res.json(news);
 });
 
 const PORT = process.env.PORT || 5000;

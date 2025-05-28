@@ -7,13 +7,23 @@ export default function Home() {
 
   useEffect(() => {
     fetch('http://localhost:5000/api/news')
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return res.json();
+      })
       .then(data => {
         setNews(data);
         // Set first 3 news items as featured
         setFeaturedNews(data.slice(0, 3));
       })
-      .catch(err => console.error(err));
+      .catch(err => {
+        console.error('Error fetching news:', err);
+        // Set empty arrays to prevent errors
+        setNews([]);
+        setFeaturedNews([]);
+      });
   }, []);
 
   return (

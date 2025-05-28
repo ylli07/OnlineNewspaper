@@ -1,7 +1,36 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const NavItems = () => {
+  const navigate = useNavigate();
+  const isLoggedIn = localStorage.getItem('token') !== null;
+
+  const handleLogout = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      
+      // Call the logout endpoint
+      const response = await fetch('http://localhost:5000/api/auth/logout', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        // Clear the token from localStorage
+        localStorage.removeItem('token');
+        // Redirect to login page
+        navigate('/login');
+      } else {
+        console.error('Logout failed');
+      }
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
+  };
+
   const navItems = [
     { id: 1, name: 'Home', path: '/' },
     { id: 2, name: 'World', path: '/world' },
@@ -21,12 +50,24 @@ const NavItems = () => {
         ))}
       </ul>
       <div style={styles.authButtons}>
-        <Link to="/login" style={styles.loginButton}>
-          Login
-        </Link>
-        <Link to="/signup" style={styles.signupButton}>
-          Sign Up
-        </Link>
+        {isLoggedIn ? (
+          <button 
+            onClick={handleLogout} 
+            style={styles.logoutButton}
+            type="button"
+          >
+            Log Out
+          </button>
+        ) : (
+          <>
+            <Link to="/login" style={styles.loginButton}>
+              Login
+            </Link>
+            <Link to="/signup" style={styles.signupButton}>
+              Sign Up
+            </Link>
+          </>
+        )}
       </div>
     </div>
   );
@@ -104,6 +145,23 @@ const styles = {
     '&:hover': {
       backgroundColor: '#3498db',
       color: '#fff',
+    },
+  },
+  logoutButton: {
+    backgroundColor: '#e74c3c',
+    color: '#fff',
+    padding: '0.6rem 1.5rem',
+    borderRadius: '25px',
+    border: '2px solid #e74c3c',
+    fontSize: '1rem',
+    fontWeight: '500',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    textDecoration: 'none',
+    display: 'inline-block',
+    '&:hover': {
+      backgroundColor: 'transparent',
+      color: '#e74c3c',
     },
   },
 };

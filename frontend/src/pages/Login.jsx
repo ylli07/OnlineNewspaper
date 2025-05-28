@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import NavItems from '../components/NavItems';
 
 const Login = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    email: '',
+    username: '',
     password: '',
   });
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -15,10 +18,36 @@ const Login = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Implement login logic
-    console.log('Login attempt:', formData);
+    setError('');
+    setIsLoading(true);
+
+    try {
+      console.log('Attempting login with:', formData);
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+      console.log('Login response:', data);
+
+      if (response.ok) {
+        localStorage.setItem('token', data.token);
+        navigate('/');
+      } else {
+        setError(data.message || 'Login failed');
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('Could not connect to the server. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -39,16 +68,18 @@ const Login = () => {
           <p style={styles.subtitle}>Please sign in to continue</p>
           
           <form onSubmit={handleSubmit} style={styles.form}>
+            {error && <div style={styles.error}>{error}</div>}
+            
             <div style={styles.inputGroup}>
-              <label htmlFor="email" style={styles.label}>Email</label>
+              <label htmlFor="username" style={styles.label}>Username</label>
               <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
+                type="text"
+                id="username"
+                name="username"
+                value={formData.username}
                 onChange={handleChange}
                 style={styles.input}
-                placeholder="Enter your email"
+                placeholder="Enter your username"
                 required
               />
             </div>
@@ -73,8 +104,8 @@ const Login = () => {
               </Link>
             </div>
 
-            <button type="submit" style={styles.submitButton}>
-              Sign In
+            <button type="submit" style={styles.submitButton} disabled={isLoading}>
+              {isLoading ? 'Logging in...' : 'Sign In'}
             </button>
 
             <div style={styles.registerLink}>
@@ -205,6 +236,15 @@ const styles = {
     '&:hover': {
       textDecoration: 'underline',
     },
+  },
+  error: {
+    color: '#e74c3c',
+    textAlign: 'center',
+    fontSize: '0.9rem',
+    backgroundColor: '#fde8e8',
+    padding: '0.5rem',
+    borderRadius: '5px',
+    marginBottom: '1rem',
   },
 };
 
