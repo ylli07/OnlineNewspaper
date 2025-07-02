@@ -6,6 +6,7 @@ import Sports from './pages/Sports';
 import Technology from './pages/Technology';
 import Login from './pages/Login';
 import Signup from './components/Signup';
+import AdminDashboard from './pages/AdminDashboard';
 import './App.css';
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
         <Route path="/technology" element={<Technology />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/admin" element={<AdminDashboard />} />
       </Routes>
     </Router>
   );

@@ -144,6 +144,41 @@ router.post('/setup-admin', async (req, res) => {
   }
 });
 
+// Route to create a second admin user
+router.post('/setup-admin2', async (req, res) => {
+  try {
+    console.log('Starting admin2 setup...');
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash('admin2', salt);
+    console.log('Generated hash for admin2:', hashedPassword);
+
+    // Delete existing admin2 if exists
+    db.query('DELETE FROM users WHERE username = ?', ['admin2'], (err, result) => {
+      if (err) {
+        console.error('Error deleting existing admin2:', err);
+        return res.status(500).json({ message: 'Error deleting existing admin2' });
+      }
+      console.log('Existing admin2 deleted');
+
+      // Insert new admin2
+      console.log('Inserting new admin2...');
+      const query = 'INSERT INTO users (username, password, role) VALUES (?, ?, ?)';
+      db.query(query, ['admin2', hashedPassword, 'admin'], (err, result) => {
+        if (err) {
+          console.error('Error creating admin2:', err);
+          return res.status(500).json({ message: 'Error creating admin2 user' });
+        }
+        console.log('Admin2 user created successfully');
+        res.status(201).json({ message: 'Admin2 user created successfully' });
+      });
+    });
+  } catch (error) {
+    console.error('Error in setup-admin2:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
 // Logout route
 router.post('/logout', (req, res) => {
   try {

@@ -1,42 +1,44 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+
+// Simple JWT decode function to get payload
+function parseJwt(token) {
+  try {
+    return JSON.parse(atob(token.split('.')[1]));
+  } catch (e) {
+    return null;
+  }
+}
 
 const NavItems = () => {
-  const navigate = useNavigate();
-  const isLoggedIn = localStorage.getItem('token') !== null;
-
-  const handleLogout = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      
-      // Call the logout endpoint
-      const response = await fetch('http://localhost:5000/api/auth/logout', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (response.ok) {
-        // Clear the token from localStorage
-        localStorage.removeItem('token');
-        // Redirect to login page
-        navigate('/login');
-      } else {
-        console.error('Logout failed');
-      }
-    } catch (error) {
-      console.error('Error during logout:', error);
-    }
-  };
-
   const navItems = [
     { id: 1, name: 'Home', path: '/' },
     { id: 2, name: 'World', path: '/world' },
     { id: 3, name: 'Sports', path: '/sports' },
     { id: 4, name: 'Technology', path: '/technology' }
   ];
+
+  // Check if user is admin and get role
+  let isAdmin = false;
+  let role = null;
+  let username = null;
+  const token = localStorage.getItem('token');
+  if (token) {
+    const payload = parseJwt(token);
+    if (payload) {
+      role = payload.role;
+      username = payload.username;
+      if (role === 'admin') {
+        isAdmin = true;
+      }
+    }
+  }
+
+  // Logout handler
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    window.location.reload();
+  };
 
   return (
     <div style={styles.navContainer}>
@@ -48,16 +50,22 @@ const NavItems = () => {
             </Link>
           </li>
         ))}
+        {isAdmin && (
+          <li style={styles.navItem}>
+            <Link to="/admin" style={styles.link}>
+              Admin Dashboard
+            </Link>
+          </li>
+        )}
       </ul>
       <div style={styles.authButtons}>
-        {isLoggedIn ? (
-          <button 
-            onClick={handleLogout} 
-            style={styles.logoutButton}
-            type="button"
-          >
-            Log Out
-          </button>
+        {token ? (
+          <>
+            <span style={{ color: '#fff', marginRight: '1rem', fontSize: '0.95rem' }}>
+              Logged in as: <b>{username}</b> ({role})
+            </span>
+            <button onClick={handleLogout} style={styles.logoutButton}>Logout</button>
+          </>
         ) : (
           <>
             <Link to="/login" style={styles.loginButton}>
@@ -116,6 +124,7 @@ const styles = {
   authButtons: {
     display: 'flex',
     gap: '1rem',
+    alignItems: 'center',
   },
   loginButton: {
     backgroundColor: '#3498db',
@@ -150,19 +159,14 @@ const styles = {
   logoutButton: {
     backgroundColor: '#e74c3c',
     color: '#fff',
-    padding: '0.6rem 1.5rem',
+    padding: '0.5rem 1.2rem',
     borderRadius: '25px',
-    border: '2px solid #e74c3c',
+    border: 'none',
     fontSize: '1rem',
     fontWeight: '500',
     cursor: 'pointer',
-    transition: 'all 0.3s ease',
-    textDecoration: 'none',
-    display: 'inline-block',
-    '&:hover': {
-      backgroundColor: 'transparent',
-      color: '#e74c3c',
-    },
+    transition: 'background 0.3s',
+    marginLeft: '0.5rem',
   },
 };
 
