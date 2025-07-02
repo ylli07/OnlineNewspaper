@@ -15,29 +15,36 @@ export default function Technology() {
       <button onClick={() => window.history.back()} style={styles.backButton}>←</button>
       <h1 style={styles.title}>Technology News</h1>
       <div style={styles.imageContainer}>
-        <img src="/path/to/image1.jpg" alt="Technology Image 1" style={styles.image} />
-        <img src="/path/to/image2.jpg" alt="Technology Image 2" style={styles.image} />
+        <div style={styles.topImageBox}>
+          <img src="/path/to/image1.jpg" alt="Technology Image 1" style={styles.topImage} />
+          <div style={styles.imageCaption}>Përshkrimi i fotos 1</div>
+        </div>
+        <div style={styles.topImageBox}>
+          <img src="/path/to/image2.jpg" alt="Technology Image 2" style={styles.topImage} />
+          <div style={styles.imageCaption}>Përshkrimi i fotos 2</div>
+        </div>
       </div>
       <div style={styles.descriptionContainer}>
         <h3>About Technology</h3>
         <p>Write something about technology here...</p>
       </div>
       <div style={styles.newsGrid}>
-        {news.map(({ id, title, summary, imageUrl }) => (
+        {Array.isArray(news) ? news.map(({ id, title, summary, imageUrl }) => (
           <div key={id} style={styles.newsCard}>
             <div style={styles.imageContainer}>
               <img 
-                src={imageUrl || 'https://via.placeholder.com/400x250'} 
+                src={imageUrl || 'https://via.placeholder.com/600x350'} 
                 alt={title}
-                style={styles.image}
+                style={styles.newsImage}
               />
+              <div style={styles.imageCaption}>{summary}</div>
             </div>
             <div style={styles.content}>
               <h2 style={styles.newsTitle}>{title}</h2>
               <p style={styles.summary}>{summary}</p>
             </div>
           </div>
-        ))}
+        )) : <p>No news found.</p>}
       </div>
       <footer style={styles.footer}>
         <div style={styles.footerContent}>
@@ -104,10 +111,29 @@ const styles = {
     gap: '1rem',
     marginBottom: '1rem',
   },
-  image: {
-    width: '45%',
-    height: 'auto',
+  topImageBox: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    width: '48%',
+  },
+  topImage: {
+    width: '100%',
+    height: '350px',
     objectFit: 'cover',
+    borderRadius: '10px',
+  },
+  newsImage: {
+    width: '100%',
+    height: '300px',
+    objectFit: 'cover',
+    borderRadius: '10px',
+  },
+  imageCaption: {
+    marginTop: '0.5rem',
+    fontStyle: 'italic',
+    color: '#555',
+    textAlign: 'center',
   },
   content: {
     padding: '1.5rem',

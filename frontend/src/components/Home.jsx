@@ -51,10 +51,10 @@ export default function Home() {
                     alt={title}
                     style={styles.featuredImage}
                   />
+                  <div style={styles.imageCaption}>{summary}</div>
                 </div>
                 <h3 style={styles.featuredTitle}>{title}</h3>
                 <p style={styles.category}>{category}</p>
-                <p style={styles.summary}>{summary}</p>
               </div>
             ))}
           </div>
@@ -81,11 +81,11 @@ export default function Home() {
             {[1, 2, 3, 4, 5, 6].map((item) => (
               <div key={item} style={styles.galleryItem}>
                 <img 
-                  src={`https://source.unsplash.com/random/300x200?sig=${item}`}
+                  src={`https://source.unsplash.com/random/600x400?sig=${item}`}
                   alt={`Gallery item ${item}`}
                   style={styles.galleryImage}
                 />
-                <p style={styles.galleryCaption}>News Photo {item}</p>
+                <div style={styles.galleryCaption}>Përshkrimi i fotos {item}</div>
               </div>
             ))}
           </div>
@@ -187,8 +187,15 @@ const styles = {
   },
   featuredImage: {
     width: '100%',
-    height: '100%',
+    height: '350px',
     objectFit: 'cover',
+    borderRadius: '10px',
+  },
+  imageCaption: {
+    marginTop: '0.5rem',
+    fontStyle: 'italic',
+    color: '#555',
+    textAlign: 'center',
   },
   featuredTitle: {
     fontSize: '1.5rem',
@@ -235,22 +242,15 @@ const styles = {
   },
   galleryImage: {
     width: '100%',
-    height: '200px',
+    height: '300px',
     objectFit: 'cover',
-    transition: 'transform 0.3s ease',
-    '&:hover': {
-      transform: 'scale(1.05)',
-    },
+    borderRadius: '10px',
   },
   galleryCaption: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    padding: '0.5rem',
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    color: '#fff',
-    margin: 0,
+    marginTop: '0.5rem',
+    fontStyle: 'italic',
+    color: '#555',
+    textAlign: 'center',
   },
   footer: {
     backgroundColor: '#1a1a1a',
