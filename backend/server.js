@@ -33,7 +33,8 @@ app.use('/api/auth', authRoutes);
 
 // Protected routes
 app.use('/api/auth/logout', authMiddleware);
-app.use('/api/news', authMiddleware); // Protect news routes
+// app.use('/api/news', authMiddleware); // Protect news routes
+// app.use('/api/featured', authMiddleware); // Protect featured routes (if added)
 
 // Simple test route
 app.get('/', (req, res) => {
@@ -88,6 +89,34 @@ app.put('/api/news/:id', (req, res) => {
       return res.status(500).json({ error: 'Error updating news' });
     }
     res.json({ id, ...req.body });
+  });
+});
+
+// Featured content endpoints
+app.get('/api/featured', (req, res) => {
+  db.query('SELECT * FROM featured_content LIMIT 1', (err, results) => {
+    if (err) {
+      console.error('Error fetching featured content:', err);
+      return res.status(500).json({ error: 'Error fetching featured content' });
+    }
+    res.json(results[0] || {});
+  });
+});
+
+app.put('/api/featured/:id', (req, res) => {
+  const { image_url, description } = req.body;
+  const { id } = req.params;
+  console.log('PUT /api/featured/:id', { id, image_url, description });
+  db.query('UPDATE featured_content SET image_url=?, description=? WHERE id=?', [image_url, description, id], (err, result) => {
+    if (err) {
+      console.error('Error updating featured content:', err);
+      return res.status(500).json({ error: 'Error updating featured content' });
+    }
+    if (result.affectedRows === 0) {
+      // No row updated, maybe id does not exist
+      return res.status(404).json({ error: 'No featured content found with this id' });
+    }
+    res.json({ id, image_url, description });
   });
 });
 

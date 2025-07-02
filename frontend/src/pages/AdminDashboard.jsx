@@ -5,11 +5,20 @@ const AdminDashboard = () => {
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({ title: '', content: '', image_url: '', image_caption: '', category_id: '', author_id: '' });
   const [showNewsTable, setShowNewsTable] = useState(false);
+  const [featured, setFeatured] = useState({ id: '', image_url: '', description: '' });
+  const [featuredEdit, setFeaturedEdit] = useState({ image_url: '', description: '' });
+  const [showFeaturedEdit, setShowFeaturedEdit] = useState(false);
 
   useEffect(() => {
     fetch('http://localhost:5000/api/news')
       .then(res => res.json())
       .then(data => setNews(data));
+    fetch('http://localhost:5000/api/featured')
+      .then(res => res.json())
+      .then(data => {
+        setFeatured(data);
+        setFeaturedEdit({ image_url: data.image_url || '', description: data.description || '' });
+      });
   }, []);
 
   const startEdit = (item) => {
@@ -36,6 +45,24 @@ const AdminDashboard = () => {
       .then(updated => {
         setNews(news.map(n => n.id === editingId ? updated : n));
         cancelEdit();
+      });
+  };
+
+  const handleFeaturedChange = (e) => {
+    setFeaturedEdit({ ...featuredEdit, [e.target.name]: e.target.value });
+  };
+
+  const saveFeatured = () => {
+    const id = featured.id || 1;
+    fetch(`http://localhost:5000/api/featured/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(featuredEdit)
+    })
+      .then(res => res.json())
+      .then(updated => {
+        setFeatured({ ...featured, ...featuredEdit });
+        setShowFeaturedEdit(false);
       });
   };
 
@@ -83,6 +110,23 @@ const AdminDashboard = () => {
                 )) : <tr><td colSpan="4">No news found or error loading news.</td></tr>}
               </tbody>
             </table>
+          )}
+        </section>
+        <section style={styles.section}>
+          <h2>Featured Section</h2>
+          <img src={featured.image_url || 'https://via.placeholder.com/600x350?text=Foto+e+klimes'} alt="Featured" style={{ width: '60%', maxWidth: 400, borderRadius: 10, marginBottom: 10 }} />
+          <div style={{ width: '60%', maxWidth: 400, fontStyle: 'italic', color: '#555', textAlign: 'center', marginBottom: 10 }}>
+            {featured.description}
+          </div>
+          <button style={{marginBottom: '1rem', padding: '0.5rem 1.5rem', fontSize: '1rem', cursor: 'pointer'}} onClick={() => setShowFeaturedEdit(!showFeaturedEdit)}>
+            {showFeaturedEdit ? 'Cancel' : 'Edit Featured'}
+          </button>
+          {showFeaturedEdit && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <input name="image_url" value={featuredEdit.image_url} onChange={handleFeaturedChange} placeholder="Image URL" style={{ padding: '0.5rem', borderRadius: 5, border: '1px solid #ccc', fontSize: '1rem' }} />
+              <textarea name="description" value={featuredEdit.description} onChange={handleFeaturedChange} placeholder="Përshkrimi..." style={{ padding: '0.5rem', borderRadius: 5, border: '1px solid #ccc', fontSize: '1rem' }} rows={3} />
+              <button onClick={saveFeatured} style={{ padding: '0.5rem 1.5rem', fontSize: '1rem', cursor: 'pointer' }}>Save</button>
+            </div>
           )}
         </section>
         <section style={styles.section}>

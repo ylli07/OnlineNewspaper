@@ -4,6 +4,7 @@ import NavItems from './NavItems';
 export default function Home() {
   const [news, setNews] = useState([]);
   const [featuredNews, setFeaturedNews] = useState([]);
+  const [featured, setFeatured] = useState({ image_url: '', description: '' });
 
   useEffect(() => {
     fetch('http://localhost:5000/api/news')
@@ -15,15 +16,16 @@ export default function Home() {
       })
       .then(data => {
         setNews(data);
-        // Set first 3 news items as featured
         setFeaturedNews(data.slice(0, 3));
       })
       .catch(err => {
         console.error('Error fetching news:', err);
-        // Set empty arrays to prevent errors
         setNews([]);
         setFeaturedNews([]);
       });
+    fetch('http://localhost:5000/api/featured')
+      .then(res => res.json())
+      .then(data => setFeatured(data));
   }, []);
 
   return (
@@ -42,6 +44,17 @@ export default function Home() {
         {/* Featured News Section */}
         <section style={styles.featuredSection}>
           <h2 style={styles.sectionTitle}>Featured Stories</h2>
+          <div style={{ textAlign: 'center', margin: '2rem 0' }}>
+            <span style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#2c3e50' }}>
+              Si ndikon ndryshimi i klimës në valët e nxehtësisë?
+            </span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '2rem' }}>
+            <img id="custom-featured-img" src={featured.image_url || 'https://via.placeholder.com/600x350?text=Foto+e+klimes'} alt="Custom Featured" style={{ width: '60%', maxWidth: 600, borderRadius: 10, marginBottom: 10 }} />
+            <div style={{ width: '60%', maxWidth: 600, fontStyle: 'italic', color: '#555', textAlign: 'center' }}>
+              {featured.description}
+            </div>
+          </div>
           <div style={styles.featuredGrid}>
             {featuredNews.map(({ id, title, summary, category, imageUrl, image_caption, image_url }) => (
               <div key={id} style={styles.featuredBox}>
