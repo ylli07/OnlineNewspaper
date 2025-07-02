@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Connection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+        .gallery-item {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .gallery-item img {
+            max-width: 200px;
+            max-height: 150px;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <h1>Backend Connection Test</h1>
+    
+    <div id="status"></div>
+    <div id="gallery"></div>
+    
+    <button onclick="testConnection()">Test Connection</button>
+    <button onclick="loadGallery()">Load Gallery</button>
+
+    <script>
+        const API_BASE = 'http://localhost:5000';
+        
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+        
+        async function testConnection() {
+            try {
+                showStatus('Testing connection...', 'info');
+                
+                const response = await fetch(`${API_BASE}/api/health`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                showStatus(`✅ Server is running! Status: ${data.status}`, 'success');
+                console.log('Health check response:', data);
+                
+            } catch (error) {
+                showStatus(`❌ Connection failed: ${error.message}`, 'error');
+                console.error('Connection test failed:', error);
+            }
+        }
+        
+        async function loadGallery() {
+            try {
+                showStatus('Loading gallery...', 'info');
+                
+                const response = await fetch(`${API_BASE}/api/gallery`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                showStatus(`✅ Gallery loaded! Found ${data.length} items`, 'success');
+                
+                const galleryDiv = document.getElementById('gallery');
+                galleryDiv.innerHTML = '<h2>Gallery Items:</h2>';
+                
+                if (data.length === 0) {
+                    galleryDiv.innerHTML += '<p>No gallery items found.</p>';
+                } else {
+                    data.forEach(item => {
+                        galleryDiv.innerHTML += `
+                            <div class="gallery-item">
+                                <h3>Item ID: ${item.id}</h3>
+                                <img src="${item.image_url}" alt="Gallery item" onerror="this.src='https://via.placeholder.com/200x150?text=Image+Not+Found'">
+                                <p><strong>Caption:</strong> ${item.image_caption || 'No caption'}</p>
+                                <p><strong>Order:</strong> ${item.gallery_order}</p>
+                                <p><strong>Image URL:</strong> ${item.image_url}</p>
+                            </div>
+                        `;
+                    });
+                }
+                
+                console.log('Gallery data:', data);
+                
+            } catch (error) {
+                showStatus(`❌ Failed to load gallery: ${error.message}`, 'error');
+                console.error('Gallery load failed:', error);
+            }
+        }
+        
+        // Auto-test on page load
+        window.onload = function() {
+            testConnection();
+        };
+    </script>
+</body>
+</html> 

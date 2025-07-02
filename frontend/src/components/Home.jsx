@@ -7,8 +7,24 @@ export default function Home() {
   const [featured, setFeatured] = useState({ image_url: '', description: '' });
   const [latestNews, setLatestNews] = useState({ image_url: '', description: '' });
   const [gallery, setGallery] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
+    setLoading(true);
+    setError(null);
+    
+    // Check server health first
+    fetch('http://localhost:5000/api/health')
+      .then(res => res.json())
+      .then(health => {
+        console.log('Server health:', health);
+      })
+      .catch(err => {
+        console.error('Server health check failed:', err);
+        setError('Server connection failed');
+      });
+
     fetch('http://localhost:5000/api/news')
       .then(res => {
         if (!res.ok) {
@@ -26,16 +42,34 @@ export default function Home() {
         console.error('Error fetching news:', err);
         setNews([]);
         setFeaturedNews([]);
+        setError('Failed to load news');
       });
     fetch('http://localhost:5000/api/featured')
       .then(res => res.json())
-      .then(data => setFeatured(data));
+      .then(data => setFeatured(data))
+      .catch(err => console.error('Error fetching featured:', err));
     fetch('http://localhost:5000/api/latest-news')
       .then(res => res.json())
-      .then(data => setLatestNews(data));
+      .then(data => setLatestNews(data))
+      .catch(err => console.error('Error fetching latest news:', err));
     fetch('http://localhost:5000/api/gallery')
-      .then(res => res.json())
-      .then(data => setGallery(data));
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then(data => {
+        console.log('Gallery data received:', data);
+        setGallery(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Error fetching gallery:', err);
+        setGallery([]);
+        setError('Failed to load gallery');
+        setLoading(false);
+      });
   }, []);
 
   return (
@@ -106,6 +140,17 @@ export default function Home() {
         {/* Photo Gallery Section */}
         <section style={styles.gallerySection}>
           <h2 style={styles.sectionTitle}>Photo Gallery</h2>
+          {error && (
+            <div style={styles.errorMessage}>
+              <p>Error: {error}</p>
+              <p>Please check if the backend server is running on port 5000</p>
+            </div>
+          )}
+          {loading && (
+            <div style={styles.loadingMessage}>
+              <p>Loading gallery...</p>
+            </div>
+          )}
           <div style={styles.galleryGrid}>
             {gallery.length > 0 ? gallery.map((item) => (
               <div key={item.id} style={styles.galleryItem}>
@@ -113,14 +158,19 @@ export default function Home() {
                   src={item.image_url}
                   alt={`Gallery item ${item.id}`}
                   style={styles.galleryImage}
+                  onError={(e) => {
+                    console.error('Image failed to load:', item.image_url);
+                    e.target.src = 'https://via.placeholder.com/300x200?text=Image+Not+Found';
+                  }}
                 />
                 <div style={styles.galleryCaption}>{item.image_caption}</div>
               </div>
-            )) : (
+            )) : !loading && !error ? (
               <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '2rem', color: '#666' }}>
                 <p>Asnjë foto në galeri. Shto foto nga admin dashboard.</p>
+                <p>Gallery items count: {gallery.length}</p>
               </div>
-            )}
+            ) : null}
           </div>
         </section>
       </main>
@@ -362,5 +412,23 @@ const styles = {
   copyright: {
     color: '#bdc3c7',
     fontSize: '0.9rem',
+  },
+  errorMessage: {
+    backgroundColor: '#fdf2f2',
+    border: '1px solid #fecaca',
+    color: '#dc2626',
+    padding: '1rem',
+    borderRadius: '8px',
+    marginBottom: '1rem',
+    textAlign: 'center',
+  },
+  loadingMessage: {
+    backgroundColor: '#eff6ff',
+    border: '1px solid #bfdbfe',
+    color: '#2563eb',
+    padding: '1rem',
+    borderRadius: '8px',
+    marginBottom: '1rem',
+    textAlign: 'center',
   },
 };

@@ -5,7 +5,15 @@ const mysql = require('mysql2');
 require('dotenv').config();
 
 const app = express();
-app.use(cors());
+
+// Improved CORS configuration
+app.use(cors({
+  origin: '*', // Allow all origins
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
+
 app.use(express.json());
 
 // Import routes
@@ -39,6 +47,16 @@ app.use('/api/auth/logout', authMiddleware);
 // Simple test route
 app.get('/', (req, res) => {
   res.send('Backend is running');
+});
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    message: 'Server is running',
+    timestamp: new Date().toISOString(),
+    database: 'Connected'
+  });
 });
 
 // Sample route to fetch articles (example)
@@ -149,11 +167,13 @@ app.put('/api/latest-news/:id', (req, res) => {
 
 // Photo gallery endpoints (using news table)
 app.get('/api/gallery', (req, res) => {
+  console.log('GET /api/gallery - Fetching gallery items');
   db.query('SELECT id, image_url, image_caption, gallery_order FROM news WHERE gallery_order IS NOT NULL ORDER BY gallery_order ASC', (err, results) => {
     if (err) {
       console.error('Error fetching gallery:', err);
-      return res.status(500).json({ error: 'Error fetching gallery' });
+      return res.status(500).json({ error: 'Error fetching gallery', details: err.message });
     }
+    console.log(`Found ${results.length} gallery items`);
     res.json(results);
   });
 });
@@ -190,11 +210,13 @@ app.post('/api/gallery', (req, res) => {
 
 // Sports content endpoints (using news table)
 app.get('/api/sports-content', (req, res) => {
+  console.log('GET /api/sports-content - Fetching sports content');
   db.query('SELECT id, image_url, image_caption, sports_order FROM news WHERE sports_order IS NOT NULL ORDER BY sports_order ASC LIMIT 2', (err, results) => {
     if (err) {
       console.error('Error fetching sports content:', err);
-      return res.status(500).json({ error: 'Error fetching sports content' });
+      return res.status(500).json({ error: 'Error fetching sports content', details: err.message });
     }
+    console.log(`Found ${results.length} sports items`);
     // Return the first two sports items
     res.json(results.slice(0, 2));
   });
