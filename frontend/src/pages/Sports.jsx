@@ -74,10 +74,22 @@ export default function Sports() {
           <div style={styles.footerSection}>
             <h3 style={styles.footerTitle}>Quick Links</h3>
             <ul style={styles.footerLinks}>
-              <li style={styles.footerLinkItem}>Contact Us</li>
-              <li style={styles.footerLinkItem}>Privacy Policy</li>
-              <li style={styles.footerLinkItem}>Terms of Service</li>
-              <li style={styles.footerLinkItem}>Advertise</li>
+              <li style={styles.footerLinkItem}>
+                <div style={styles.linkTitle}>Contact Us</div>
+                <div style={styles.linkDescription}>Na kontaktoni për pyetje, sugjerime dhe mbështetje teknike</div>
+              </li>
+              <li style={styles.footerLinkItem}>
+                <div style={styles.linkTitle}>Privacy Policy</div>
+                <div style={styles.linkDescription}>Si mbrojmë dhe përdorim të dhënat tuaja personale</div>
+              </li>
+              <li style={styles.footerLinkItem}>
+                <div style={styles.linkTitle}>Terms of Service</div>
+                <div style={styles.linkDescription}>Kushtet dhe rregullat e përdorimit të platformës sonë</div>
+              </li>
+              <li style={styles.footerLinkItem}>
+                <div style={styles.linkTitle}>Advertise</div>
+                <div style={styles.linkDescription}>Mundësitë për reklamim dhe promovim në platformën tonë</div>
+              </li>
             </ul>
           </div>
           <div style={styles.footerSection}>
@@ -223,5 +235,17 @@ const styles = {
   },
   copyright: {
     color: '#fff',
+  },
+  linkTitle: {
+    fontWeight: '600',
+    color: '#ecf0f1',
+    marginBottom: '0.3rem',
+    fontSize: '1rem',
+  },
+  linkDescription: {
+    fontSize: '0.85rem',
+    color: '#95a5a6',
+    lineHeight: '1.4',
+    fontStyle: 'italic',
   },
 }; 
