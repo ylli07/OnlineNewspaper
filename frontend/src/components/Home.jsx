@@ -6,6 +6,7 @@ export default function Home() {
   const [featuredNews, setFeaturedNews] = useState([]);
   const [featured, setFeatured] = useState({ image_url: '', description: '' });
   const [latestNews, setLatestNews] = useState({ image_url: '', description: '' });
+  const [gallery, setGallery] = useState([]);
 
   useEffect(() => {
     fetch('http://localhost:5000/api/news')
@@ -17,7 +18,9 @@ export default function Home() {
       })
       .then(data => {
         setNews(data);
-        setFeaturedNews(data.slice(0, 3));
+        // Filter out gallery items from featured news
+        const nonGalleryNews = data.filter(item => !item.gallery_order);
+        setFeaturedNews(nonGalleryNews.slice(0, 3));
       })
       .catch(err => {
         console.error('Error fetching news:', err);
@@ -30,6 +33,9 @@ export default function Home() {
     fetch('http://localhost:5000/api/latest-news')
       .then(res => res.json())
       .then(data => setLatestNews(data));
+    fetch('http://localhost:5000/api/gallery')
+      .then(res => res.json())
+      .then(data => setGallery(data));
   }, []);
 
   return (
@@ -87,7 +93,7 @@ export default function Home() {
             </div>
           </div>
           <div style={styles.newsGrid}>
-            {news.map(({ id, title, summary, category }) => (
+            {news.filter(item => !item.gallery_order).map(({ id, title, summary, category }) => (
               <div key={id} style={styles.newsBox}>
                 <h3 style={styles.title}>{title}</h3>
                 <p style={styles.category}>{category}</p>
@@ -101,16 +107,20 @@ export default function Home() {
         <section style={styles.gallerySection}>
           <h2 style={styles.sectionTitle}>Photo Gallery</h2>
           <div style={styles.galleryGrid}>
-            {[1, 2, 3, 4, 5, 6].map((item) => (
-              <div key={item} style={styles.galleryItem}>
+            {gallery.length > 0 ? gallery.map((item) => (
+              <div key={item.id} style={styles.galleryItem}>
                 <img 
-                  src={`https://source.unsplash.com/random/600x400?sig=${item}`}
-                  alt={`Gallery item ${item}`}
+                  src={item.image_url}
+                  alt={`Gallery item ${item.id}`}
                   style={styles.galleryImage}
                 />
-                <div style={styles.galleryCaption}>Përshkrimi i fotos {item}</div>
+                <div style={styles.galleryCaption}>{item.image_caption}</div>
               </div>
-            ))}
+            )) : (
+              <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '2rem', color: '#666' }}>
+                <p>Asnjë foto në galeri. Shto foto nga admin dashboard.</p>
+              </div>
+            )}
           </div>
         </section>
       </main>

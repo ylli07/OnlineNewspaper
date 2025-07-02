@@ -11,6 +11,11 @@ const AdminDashboard = () => {
   const [latestNews, setLatestNews] = useState({ id: '', image_url: '', description: '' });
   const [latestNewsEdit, setLatestNewsEdit] = useState({ image_url: '', description: '' });
   const [showLatestNewsEdit, setShowLatestNewsEdit] = useState(false);
+  const [gallery, setGallery] = useState([]);
+  const [galleryEdit, setGalleryEdit] = useState({ image_url: '', image_caption: '', gallery_order: '' });
+  const [showGalleryEdit, setShowGalleryEdit] = useState(false);
+  const [editingGalleryId, setEditingGalleryId] = useState(null);
+  const [newGalleryItem, setNewGalleryItem] = useState({ image_url: '', image_caption: '', gallery_order: '' });
 
   useEffect(() => {
     fetch('http://localhost:5000/api/news')
@@ -28,6 +33,9 @@ const AdminDashboard = () => {
         setLatestNews(data);
         setLatestNewsEdit({ image_url: data.image_url || '', description: data.description || '' });
       });
+    fetch('http://localhost:5000/api/gallery')
+      .then(res => res.json())
+      .then(data => setGallery(data));
   }, []);
 
   const startEdit = (item) => {
@@ -91,6 +99,62 @@ const AdminDashboard = () => {
 
   const handleLatestNewsChange = (e) => {
     setLatestNewsEdit({ ...latestNewsEdit, [e.target.name]: e.target.value });
+  };
+
+  const startGalleryEdit = (item) => {
+    setEditingGalleryId(item.id);
+    setGalleryEdit({ image_url: item.image_url || '', image_caption: item.image_caption || '', gallery_order: item.gallery_order || '' });
+  };
+
+  const cancelGalleryEdit = () => {
+    setEditingGalleryId(null);
+    setGalleryEdit({ image_url: '', image_caption: '', gallery_order: '' });
+  };
+
+  const saveGalleryEdit = () => {
+    fetch(`http://localhost:5000/api/gallery/${editingGalleryId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(galleryEdit)
+    })
+      .then(res => res.json())
+      .then(updated => {
+        setGallery(gallery.map(g => g.id === editingGalleryId ? updated : g));
+        cancelGalleryEdit();
+      });
+  };
+
+  const handleGalleryChange = (e) => {
+    setGalleryEdit({ ...galleryEdit, [e.target.name]: e.target.value });
+  };
+
+  const handleNewGalleryChange = (e) => {
+    setNewGalleryItem({ ...newGalleryItem, [e.target.name]: e.target.value });
+  };
+
+  const addGalleryItem = () => {
+    console.log('Adding gallery item:', newGalleryItem);
+    fetch('http://localhost:5000/api/gallery', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newGalleryItem)
+    })
+      .then(res => {
+        console.log('Response status:', res.status);
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then(newItem => {
+        console.log('New item added:', newItem);
+        setGallery([...gallery, newItem]);
+        setNewGalleryItem({ image_url: '', image_caption: '', gallery_order: '' });
+      })
+      .catch(error => {
+        console.error('Error adding gallery item:', error);
+        alert('Error adding gallery item: ' + error.message);
+      });
   };
 
   return (
@@ -172,6 +236,45 @@ const AdminDashboard = () => {
               <button onClick={saveLatestNews} style={{ padding: '0.5rem 1.5rem', fontSize: '1rem', cursor: 'pointer' }}>Save</button>
             </div>
           )}
+        </section>
+        <section style={styles.section}>
+          <h2>Photo Gallery Management</h2>
+          <div style={{ marginBottom: '1rem' }}>
+            <h3>Add New Gallery Item</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: '1rem' }}>
+              <input name="image_url" value={newGalleryItem.image_url} onChange={handleNewGalleryChange} placeholder="Image URL" style={{ padding: '0.5rem', borderRadius: 5, border: '1px solid #ccc', fontSize: '1rem' }} />
+              <textarea name="image_caption" value={newGalleryItem.image_caption} onChange={handleNewGalleryChange} placeholder="Përshkrimi i fotos..." style={{ padding: '0.5rem', borderRadius: 5, border: '1px solid #ccc', fontSize: '1rem' }} rows={2} />
+              <input name="gallery_order" type="number" value={newGalleryItem.gallery_order} onChange={handleNewGalleryChange} placeholder="Renditja (1, 2, 3...)" style={{ padding: '0.5rem', borderRadius: 5, border: '1px solid #ccc', fontSize: '1rem' }} />
+              <button onClick={addGalleryItem} style={{ padding: '0.5rem 1.5rem', fontSize: '1rem', cursor: 'pointer' }}>Add Gallery Item</button>
+            </div>
+          </div>
+          <div>
+            <h3>Edit Gallery Items</h3>
+            <div style={{ display: 'grid', gap: '1rem' }}>
+              {gallery.map(item => (
+                <div key={item.id} style={{ border: '1px solid #ddd', padding: '1rem', borderRadius: 5 }}>
+                  <img src={item.image_url} alt="" style={{ width: 100, height: 60, objectFit: 'cover', marginBottom: '0.5rem' }} />
+                  {editingGalleryId === item.id ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                      <input name="image_url" value={galleryEdit.image_url} onChange={handleGalleryChange} placeholder="Image URL" style={{ padding: '0.5rem', borderRadius: 5, border: '1px solid #ccc', fontSize: '1rem' }} />
+                      <textarea name="image_caption" value={galleryEdit.image_caption} onChange={handleGalleryChange} placeholder="Përshkrimi..." style={{ padding: '0.5rem', borderRadius: 5, border: '1px solid #ccc', fontSize: '1rem' }} rows={2} />
+                      <input name="gallery_order" type="number" value={galleryEdit.gallery_order} onChange={handleGalleryChange} placeholder="Renditja" style={{ padding: '0.5rem', borderRadius: 5, border: '1px solid #ccc', fontSize: '1rem' }} />
+                      <div style={{ display: 'flex', gap: 10 }}>
+                        <button onClick={saveGalleryEdit} style={{ padding: '0.5rem 1rem', fontSize: '1rem', cursor: 'pointer' }}>Save</button>
+                        <button onClick={cancelGalleryEdit} style={{ padding: '0.5rem 1rem', fontSize: '1rem', cursor: 'pointer' }}>Cancel</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <p><strong>Caption:</strong> {item.image_caption}</p>
+                      <p><strong>Order:</strong> {item.gallery_order}</p>
+                      <button onClick={() => startGalleryEdit(item)} style={{ padding: '0.5rem 1rem', fontSize: '1rem', cursor: 'pointer' }}>Edit</button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
         </section>
         <section style={styles.section}>
           <h2>Manage Comments</h2>
