@@ -206,9 +206,15 @@ export default function Home() {
           <div style={styles.footerSection}>
             <h3 style={styles.footerTitle}>Follow Us</h3>
             <div style={styles.socialLinks}>
-              <span style={styles.socialIcon}>Facebook</span>
-              <span style={styles.socialIcon}>Twitter</span>
-              <span style={styles.socialIcon}>Instagram</span>
+              <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" style={styles.socialIcon}>
+                Facebook
+              </a>
+              <a href="https://www.twitter.com" target="_blank" rel="noopener noreferrer" style={styles.socialIcon}>
+                Twitter
+              </a>
+              <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" style={styles.socialIcon}>
+                Instagram
+              </a>
             </div>
           </div>
         </div>
@@ -423,6 +429,7 @@ const styles = {
     color: '#bdc3c7',
     transition: 'all 0.3s ease',
     fontSize: '1rem',
+    textDecoration: 'none',
     '&:hover': {
       color: '#3498db',
       transform: 'translateY(-3px)',
