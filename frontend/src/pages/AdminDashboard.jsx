@@ -16,6 +16,11 @@ const AdminDashboard = () => {
   const [showGalleryEdit, setShowGalleryEdit] = useState(false);
   const [editingGalleryId, setEditingGalleryId] = useState(null);
   const [newGalleryItem, setNewGalleryItem] = useState({ image_url: '', image_caption: '', gallery_order: '' });
+  const [sportsContent, setSportsContent] = useState([]);
+  const [sportsContentEdit, setSportsContentEdit] = useState({ image_url: '', image_caption: '', sports_order: '' });
+  const [showSportsContentEdit, setShowSportsContentEdit] = useState(false);
+  const [editingSportsId, setEditingSportsId] = useState(null);
+  const [newSportsItem, setNewSportsItem] = useState({ image_url: '', image_caption: '', sports_order: '' });
 
   useEffect(() => {
     fetch('http://localhost:5000/api/news')
@@ -36,6 +41,9 @@ const AdminDashboard = () => {
     fetch('http://localhost:5000/api/gallery')
       .then(res => res.json())
       .then(data => setGallery(data));
+    fetch('http://localhost:5000/api/sports-content')
+      .then(res => res.json())
+      .then(data => setSportsContent(data));
   }, []);
 
   const startEdit = (item) => {
@@ -83,22 +91,65 @@ const AdminDashboard = () => {
       });
   };
 
+  const handleLatestNewsChange = (e) => {
+    setLatestNewsEdit({ ...latestNewsEdit, [e.target.name]: e.target.value });
+  };
+
+  const handleSportsContentChange = (e) => {
+    setSportsContentEdit({ ...sportsContentEdit, [e.target.name]: e.target.value });
+  };
+
+  const handleNewSportsChange = (e) => {
+    setNewSportsItem({ ...newSportsItem, [e.target.name]: e.target.value });
+  };
+
+  const startSportsEdit = (item) => {
+    setEditingSportsId(item.id);
+    setSportsContentEdit({ image_url: item.image_url || '', image_caption: item.image_caption || '', sports_order: item.sports_order || '' });
+  };
+
+  const cancelSportsEdit = () => {
+    setEditingSportsId(null);
+    setSportsContentEdit({ image_url: '', image_caption: '', sports_order: '' });
+  };
+
+  const saveSportsContent = () => {
+    fetch(`http://localhost:5000/api/sports-content/${editingSportsId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(sportsContentEdit)
+    })
+      .then(res => res.json())
+      .then(updated => {
+        setSportsContent(sportsContent.map(s => s.id === editingSportsId ? updated : s));
+        cancelSportsEdit();
+      });
+  };
+
+  const addSportsItem = () => {
+    fetch('http://localhost:5000/api/sports-content', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newSportsItem)
+    })
+      .then(res => res.json())
+      .then(newItem => {
+        setSportsContent([...sportsContent, newItem]);
+        setNewSportsItem({ image_url: '', image_caption: '', sports_order: '' });
+      });
+  };
+
   const saveLatestNews = () => {
-    const id = latestNews.id || 1;
-    fetch(`http://localhost:5000/api/latest-news/${id}`, {
+    fetch(`http://localhost:5000/api/latest-news/${latestNews.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(latestNewsEdit)
     })
       .then(res => res.json())
-      .then(updated => {
+      .then(data => {
         setLatestNews({ ...latestNews, ...latestNewsEdit });
         setShowLatestNewsEdit(false);
       });
-  };
-
-  const handleLatestNewsChange = (e) => {
-    setLatestNewsEdit({ ...latestNewsEdit, [e.target.name]: e.target.value });
   };
 
   const startGalleryEdit = (item) => {
@@ -269,6 +320,45 @@ const AdminDashboard = () => {
                       <p><strong>Caption:</strong> {item.image_caption}</p>
                       <p><strong>Order:</strong> {item.gallery_order}</p>
                       <button onClick={() => startGalleryEdit(item)} style={{ padding: '0.5rem 1rem', fontSize: '1rem', cursor: 'pointer' }}>Edit</button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+        <section style={styles.section}>
+          <h2>Sports Content Management</h2>
+          <div style={{ marginBottom: '1rem' }}>
+            <h3>Add New Sports Item</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: '1rem' }}>
+              <input name="image_url" value={newSportsItem.image_url} onChange={handleNewSportsChange} placeholder="Image URL" style={{ padding: '0.5rem', borderRadius: 5, border: '1px solid #ccc', fontSize: '1rem' }} />
+              <textarea name="image_caption" value={newSportsItem.image_caption} onChange={handleNewSportsChange} placeholder="Përshkrimi i fotos..." style={{ padding: '0.5rem', borderRadius: 5, border: '1px solid #ccc', fontSize: '1rem' }} rows={2} />
+              <input name="sports_order" type="number" value={newSportsItem.sports_order} onChange={handleNewSportsChange} placeholder="Renditja (1, 2, 3...)" style={{ padding: '0.5rem', borderRadius: 5, border: '1px solid #ccc', fontSize: '1rem' }} />
+              <button onClick={addSportsItem} style={{ padding: '0.5rem 1.5rem', fontSize: '1rem', cursor: 'pointer' }}>Add Sports Item</button>
+            </div>
+          </div>
+          <div>
+            <h3>Edit Sports Items</h3>
+            <div style={{ display: 'grid', gap: '1rem' }}>
+              {sportsContent.map(item => (
+                <div key={item.id} style={{ border: '1px solid #ddd', padding: '1rem', borderRadius: 5 }}>
+                  <img src={item.image_url} alt="" style={{ width: 100, height: 60, objectFit: 'cover', marginBottom: '0.5rem' }} />
+                  {editingSportsId === item.id ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                      <input name="image_url" value={sportsContentEdit.image_url} onChange={handleSportsContentChange} placeholder="Image URL" style={{ padding: '0.5rem', borderRadius: 5, border: '1px solid #ccc', fontSize: '1rem' }} />
+                      <textarea name="image_caption" value={sportsContentEdit.image_caption} onChange={handleSportsContentChange} placeholder="Përshkrimi..." style={{ padding: '0.5rem', borderRadius: 5, border: '1px solid #ccc', fontSize: '1rem' }} rows={2} />
+                      <input name="sports_order" type="number" value={sportsContentEdit.sports_order} onChange={handleSportsContentChange} placeholder="Renditja" style={{ padding: '0.5rem', borderRadius: 5, border: '1px solid #ccc', fontSize: '1rem' }} />
+                      <div style={{ display: 'flex', gap: 10 }}>
+                        <button onClick={saveSportsContent} style={{ padding: '0.5rem 1rem', fontSize: '1rem', cursor: 'pointer' }}>Save</button>
+                        <button onClick={cancelSportsEdit} style={{ padding: '0.5rem 1rem', fontSize: '1rem', cursor: 'pointer' }}>Cancel</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <p><strong>Caption:</strong> {item.image_caption}</p>
+                      <p><strong>Order:</strong> {item.sports_order}</p>
+                      <button onClick={() => startSportsEdit(item)} style={{ padding: '0.5rem 1rem', fontSize: '1rem', cursor: 'pointer' }}>Edit</button>
                     </div>
                   )}
                 </div>

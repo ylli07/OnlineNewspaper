@@ -188,6 +188,46 @@ app.post('/api/gallery', (req, res) => {
   });
 });
 
+// Sports content endpoints (using news table)
+app.get('/api/sports-content', (req, res) => {
+  db.query('SELECT id, image_url, image_caption, sports_order FROM news WHERE sports_order IS NOT NULL ORDER BY sports_order ASC LIMIT 2', (err, results) => {
+    if (err) {
+      console.error('Error fetching sports content:', err);
+      return res.status(500).json({ error: 'Error fetching sports content' });
+    }
+    // Return the first two sports items
+    res.json(results.slice(0, 2));
+  });
+});
+
+app.put('/api/sports-content/:id', (req, res) => {
+  const { image_url, image_caption, sports_order } = req.body;
+  const { id } = req.params;
+  console.log('PUT /api/sports-content/:id', { id, image_url, image_caption, sports_order });
+  db.query('UPDATE news SET image_url=?, image_caption=?, sports_order=? WHERE id=?', [image_url, image_caption, sports_order, id], (err, result) => {
+    if (err) {
+      console.error('Error updating sports content:', err);
+      return res.status(500).json({ error: 'Error updating sports content' });
+    }
+    console.log('Sports content updated successfully');
+    res.json({ id, image_url, image_caption, sports_order });
+  });
+});
+
+app.post('/api/sports-content', (req, res) => {
+  const { image_url, image_caption, sports_order } = req.body;
+  console.log('POST /api/sports-content received:', { image_url, image_caption, sports_order });
+  const sql = 'INSERT INTO news (image_url, image_caption, sports_order, title, content, category_id, author_id) VALUES (?, ?, ?, ?, ?, ?, ?)';
+  db.query(sql, [image_url, image_caption, sports_order, 'Sports Item', 'Sports content', null, null], (err, result) => {
+    if (err) {
+      console.error('Error adding sports content:', err);
+      return res.status(500).json({ error: 'Error adding sports content' });
+    }
+    console.log('Sports content added successfully:', { id: result.insertId, image_url, image_caption, sports_order });
+    res.json({ id: result.insertId, image_url, image_caption, sports_order });
+  });
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

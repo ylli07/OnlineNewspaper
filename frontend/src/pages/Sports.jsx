@@ -2,12 +2,16 @@ import React, { useEffect, useState } from 'react';
 
 export default function Sports() {
   const [news, setNews] = useState([]);
+  const [sportsContent, setSportsContent] = useState([]);
 
   useEffect(() => {
     fetch('http://localhost:5000/api/news?category=sports')
       .then(res => res.json())
       .then(data => setNews(data))
       .catch(err => console.error(err));
+    fetch('http://localhost:5000/api/sports-content')
+      .then(res => res.json())
+      .then(data => setSportsContent(data));
   }, []);
 
   return (
@@ -15,21 +19,36 @@ export default function Sports() {
       <button onClick={() => window.history.back()} style={styles.backButton}>←</button>
       <h1 style={styles.title}>Sports News</h1>
       <div style={styles.imageContainer}>
-        <div style={styles.topImageBox}>
-          <img src="/path/to/image1.jpg" alt="Sports Image 1" style={styles.topImage} />
-          <div style={styles.imageCaption}>Përshkrimi i fotos 1</div>
-        </div>
-        <div style={styles.topImageBox}>
-          <img src="/path/to/image2.jpg" alt="Sports Image 2" style={styles.topImage} />
-          <div style={styles.imageCaption}>Përshkrimi i fotos 2</div>
-        </div>
+        {sportsContent.length > 0 ? (
+          <>
+            <div style={styles.topImageBox}>
+              <img src={sportsContent[0]?.image_url || 'https://via.placeholder.com/600x350?text=Sports+Image+1'} alt="Sports Image 1" style={styles.topImage} />
+              <div style={styles.imageCaption}>{sportsContent[0]?.image_caption || 'Përshkrimi i fotos 1'}</div>
+            </div>
+            <div style={styles.topImageBox}>
+              <img src={sportsContent[1]?.image_url || 'https://via.placeholder.com/600x350?text=Sports+Image+2'} alt="Sports Image 2" style={styles.topImage} />
+              <div style={styles.imageCaption}>{sportsContent[1]?.image_caption || 'Përshkrimi i fotos 2'}</div>
+            </div>
+          </>
+        ) : (
+          <>
+            <div style={styles.topImageBox}>
+              <img src="https://via.placeholder.com/600x350?text=Sports+Image+1" alt="Sports Image 1" style={styles.topImage} />
+              <div style={styles.imageCaption}>Përshkrimi i fotos 1</div>
+            </div>
+            <div style={styles.topImageBox}>
+              <img src="https://via.placeholder.com/600x350?text=Sports+Image+2" alt="Sports Image 2" style={styles.topImage} />
+              <div style={styles.imageCaption}>Përshkrimi i fotos 2</div>
+            </div>
+          </>
+        )}
       </div>
       <div style={styles.descriptionContainer}>
         <h3>About Sports</h3>
         <p>Write something about sports here...</p>
       </div>
       <div style={styles.newsGrid}>
-        {Array.isArray(news) ? news.map(({ id, title, summary, imageUrl, image_caption, image_url }) => (
+        {Array.isArray(news) ? news.filter(item => !item.gallery_order && !item.sports_order).map(({ id, title, summary, imageUrl, image_caption, image_url }) => (
           <div key={id} style={styles.newsCard}>
             <div style={styles.imageContainer}>
               <img 

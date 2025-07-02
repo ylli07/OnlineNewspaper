@@ -18,8 +18,8 @@ export default function Home() {
       })
       .then(data => {
         setNews(data);
-        // Filter out gallery items from featured news
-        const nonGalleryNews = data.filter(item => !item.gallery_order);
+        // Filter out gallery items and sports items from featured news
+        const nonGalleryNews = data.filter(item => !item.gallery_order && !item.sports_order);
         setFeaturedNews(nonGalleryNews.slice(0, 3));
       })
       .catch(err => {
@@ -93,7 +93,7 @@ export default function Home() {
             </div>
           </div>
           <div style={styles.newsGrid}>
-            {news.filter(item => !item.gallery_order).map(({ id, title, summary, category }) => (
+            {news.filter(item => !item.gallery_order && !item.sports_order).map(({ id, title, summary, category }) => (
               <div key={id} style={styles.newsBox}>
                 <h3 style={styles.title}>{title}</h3>
                 <p style={styles.category}>{category}</p>
