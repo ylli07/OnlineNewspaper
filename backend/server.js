@@ -52,34 +52,43 @@ app.get('/articles', (req, res) => {
   });
 });
 
-// Add this after your existing routes
+// Replace the hardcoded /api/news endpoint with a real one
 app.get('/api/news', (req, res) => {
-  // Sample news data
-  const news = [
-    {
-      id: 1,
-      title: 'Breaking News Story',
-      summary: 'This is a sample news story',
-      category: 'World',
-      imageUrl: 'https://via.placeholder.com/400x250'
-    },
-    {
-      id: 2,
-      title: 'Sports Update',
-      summary: 'Latest sports news and updates',
-      category: 'Sports',
-      imageUrl: 'https://via.placeholder.com/400x250'
-    },
-    {
-      id: 3,
-      title: 'Technology News',
-      summary: 'Latest in technology',
-      category: 'Technology',
-      imageUrl: 'https://via.placeholder.com/400x250'
+  const sql = 'SELECT * FROM news ORDER BY created_at DESC';
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error('Error fetching news:', err);
+      return res.status(500).json({ error: 'Error fetching news' });
     }
-  ];
-  
-  res.json(news);
+    res.json(results);
+  });
+});
+
+// Add endpoint to create news
+app.post('/api/news', (req, res) => {
+  const { title, content, image_url, image_caption, category_id, author_id } = req.body;
+  const sql = 'INSERT INTO news (title, content, image_url, image_caption, category_id, author_id) VALUES (?, ?, ?, ?, ?, ?)';
+  db.query(sql, [title, content, image_url, image_caption, category_id, author_id], (err, result) => {
+    if (err) {
+      console.error('Error adding news:', err);
+      return res.status(500).json({ error: 'Error adding news' });
+    }
+    res.json({ id: result.insertId, ...req.body });
+  });
+});
+
+// Add endpoint to update news
+app.put('/api/news/:id', (req, res) => {
+  const { title, content, image_url, image_caption, category_id, author_id } = req.body;
+  const { id } = req.params;
+  const sql = 'UPDATE news SET title=?, content=?, image_url=?, image_caption=?, category_id=?, author_id=? WHERE id=?';
+  db.query(sql, [title, content, image_url, image_caption, category_id, author_id, id], (err, result) => {
+    if (err) {
+      console.error('Error updating news:', err);
+      return res.status(500).json({ error: 'Error updating news' });
+    }
+    res.json({ id, ...req.body });
+  });
 });
 
 const PORT = process.env.PORT || 5000;

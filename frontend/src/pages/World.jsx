@@ -29,15 +29,15 @@ export default function World() {
         <p>Write something about the world here...</p>
       </div>
       <div style={styles.newsGrid}>
-        {Array.isArray(news) ? news.map(({ id, title, summary, imageUrl }) => (
+        {Array.isArray(news) ? news.map(({ id, title, summary, imageUrl, image_caption, image_url }) => (
           <div key={id} style={styles.newsCard}>
             <div style={styles.imageContainer}>
               <img 
-                src={imageUrl || 'https://via.placeholder.com/600x350'} 
+                src={image_url || imageUrl || 'https://via.placeholder.com/600x350'} 
                 alt={title}
                 style={styles.newsImage}
               />
-              <div style={styles.imageCaption}>{summary}</div>
+              <div style={styles.imageCaption}>{image_caption}</div>
             </div>
             <div style={styles.content}>
               <h2 style={styles.newsTitle}>{title}</h2>

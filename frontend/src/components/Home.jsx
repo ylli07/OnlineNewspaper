@@ -43,15 +43,15 @@ export default function Home() {
         <section style={styles.featuredSection}>
           <h2 style={styles.sectionTitle}>Featured Stories</h2>
           <div style={styles.featuredGrid}>
-            {featuredNews.map(({ id, title, summary, category, imageUrl }) => (
+            {featuredNews.map(({ id, title, summary, category, imageUrl, image_caption, image_url }) => (
               <div key={id} style={styles.featuredBox}>
                 <div style={styles.imageContainer}>
                   <img 
-                    src={imageUrl || 'https://via.placeholder.com/400x250'} 
+                    src={image_url || imageUrl || 'https://via.placeholder.com/400x250'} 
                     alt={title}
                     style={styles.featuredImage}
                   />
-                  <div style={styles.imageCaption}>{summary}</div>
+                  <div style={styles.imageCaption}>{image_caption}</div>
                 </div>
                 <h3 style={styles.featuredTitle}>{title}</h3>
                 <p style={styles.category}>{category}</p>
