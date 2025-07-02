@@ -5,6 +5,7 @@ export default function Home() {
   const [news, setNews] = useState([]);
   const [featuredNews, setFeaturedNews] = useState([]);
   const [featured, setFeatured] = useState({ image_url: '', description: '' });
+  const [latestNews, setLatestNews] = useState({ image_url: '', description: '' });
 
   useEffect(() => {
     fetch('http://localhost:5000/api/news')
@@ -26,6 +27,9 @@ export default function Home() {
     fetch('http://localhost:5000/api/featured')
       .then(res => res.json())
       .then(data => setFeatured(data));
+    fetch('http://localhost:5000/api/latest-news')
+      .then(res => res.json())
+      .then(data => setLatestNews(data));
   }, []);
 
   return (
@@ -76,6 +80,12 @@ export default function Home() {
         {/* Latest News Section */}
         <section style={styles.latestSection}>
           <h2 style={styles.sectionTitle}>Latest News</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '2rem' }}>
+            <img src={latestNews.image_url || 'https://via.placeholder.com/600x350?text=Latest+News'} alt="Latest News" style={{ width: '60%', maxWidth: 600, borderRadius: 10, marginBottom: 10 }} />
+            <div style={{ width: '60%', maxWidth: 600, fontStyle: 'italic', color: '#555', textAlign: 'center', marginBottom: 10 }}>
+              {latestNews.description}
+            </div>
+          </div>
           <div style={styles.newsGrid}>
             {news.map(({ id, title, summary, category }) => (
               <div key={id} style={styles.newsBox}>

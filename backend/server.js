@@ -120,6 +120,33 @@ app.put('/api/featured/:id', (req, res) => {
   });
 });
 
+// Latest news content endpoints
+app.get('/api/latest-news', (req, res) => {
+  db.query('SELECT * FROM latest_news LIMIT 1', (err, results) => {
+    if (err) {
+      console.error('Error fetching latest news content:', err);
+      return res.status(500).json({ error: 'Error fetching latest news content' });
+    }
+    res.json(results[0] || {});
+  });
+});
+
+app.put('/api/latest-news/:id', (req, res) => {
+  const { image_url, description } = req.body;
+  const { id } = req.params;
+  console.log('PUT /api/latest-news/:id', { id, image_url, description });
+  db.query('UPDATE latest_news SET image_url=?, description=? WHERE id=?', [image_url, description, id], (err, result) => {
+    if (err) {
+      console.error('Error updating latest news content:', err);
+      return res.status(500).json({ error: 'Error updating latest news content' });
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'No latest news content found with this id' });
+    }
+    res.json({ id, image_url, description });
+  });
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
