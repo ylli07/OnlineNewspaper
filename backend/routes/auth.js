@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('../db');
+const authMiddleware = require('../middleware/auth');
 
 // Signup route
 router.post('/signup', async (req, res) => {
@@ -199,6 +200,45 @@ router.post('/logout', (req, res) => {
     console.error('Error in logout:', error);
     res.status(500).json({ message: 'Server error' });
   }
+});
+
+// Get current user info
+router.get('/me', authMiddleware, (req, res) => {
+  const userId = req.user.id;
+  db.query('SELECT id, username, email, profile_pic, role FROM users WHERE id = ?', [userId], (err, results) => {
+    if (err) return res.status(500).json({ message: 'Server error' });
+    if (results.length === 0) return res.status(404).json({ message: 'User not found' });
+    res.json(results[0]);
+  });
+});
+
+// Update user info (username, email, profile_pic)
+router.put('/me', authMiddleware, (req, res) => {
+  const userId = req.user.id;
+  const { username, email, profile_pic } = req.body;
+  db.query('UPDATE users SET username = ?, email = ?, profile_pic = ? WHERE id = ?', [username, email, profile_pic, userId], (err, result) => {
+    if (err) return res.status(500).json({ message: 'Server error' });
+    res.json({ message: 'Profile updated' });
+  });
+});
+
+// Change password
+router.put('/change-password', authMiddleware, async (req, res) => {
+  const userId = req.user.id;
+  const { currentPassword, newPassword } = req.body;
+  if (!currentPassword || !newPassword) return res.status(400).json({ message: 'Both current and new password are required' });
+  db.query('SELECT password FROM users WHERE id = ?', [userId], async (err, results) => {
+    if (err) return res.status(500).json({ message: 'Server error' });
+    if (results.length === 0) return res.status(404).json({ message: 'User not found' });
+    const isMatch = await bcrypt.compare(currentPassword, results[0].password);
+    if (!isMatch) return res.status(400).json({ message: 'Current password is incorrect' });
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    db.query('UPDATE users SET password = ? WHERE id = ?', [hashedPassword, userId], (err2) => {
+      if (err2) return res.status(500).json({ message: 'Server error' });
+      res.json({ message: 'Password changed successfully' });
+    });
+  });
 });
 
 module.exports = router; 

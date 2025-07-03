@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 // Simple JWT decode function to get payload
@@ -23,6 +23,19 @@ const NavItems = () => {
   let role = null;
   let username = null;
   const token = localStorage.getItem('token');
+  const [profilePic, setProfilePic] = useState('https://via.placeholder.com/40?text=U');
+
+  useEffect(() => {
+    if (!token) return;
+    fetch('http://localhost:5000/api/auth/me', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.profile_pic) setProfilePic(data.profile_pic);
+      });
+  }, []);
+
   if (token) {
     const payload = parseJwt(token);
     if (payload) {
@@ -64,7 +77,9 @@ const NavItems = () => {
             <span style={{ color: '#fff', marginRight: '1rem', fontSize: '0.95rem' }}>
               Logged in as: <b>{username}</b> ({role})
             </span>
+            <Link to="/account" style={styles.manageButton}>Manage Account</Link>
             <button onClick={handleLogout} style={styles.logoutButton}>Logout</button>
+            <img src={profilePic} alt="Profile" style={styles.profilePic} />
           </>
         ) : (
           <>
@@ -167,6 +182,28 @@ const styles = {
     cursor: 'pointer',
     transition: 'background 0.3s',
     marginLeft: '0.5rem',
+  },
+  manageButton: {
+    backgroundColor: '#2ecc71',
+    color: '#fff',
+    padding: '0.5rem 1.2rem',
+    borderRadius: '25px',
+    border: 'none',
+    fontSize: '1rem',
+    fontWeight: '500',
+    cursor: 'pointer',
+    transition: 'background 0.3s',
+    marginRight: '0.5rem',
+    textDecoration: 'none',
+    display: 'inline-block',
+  },
+  profilePic: {
+    width: 40,
+    height: 40,
+    borderRadius: '50%',
+    objectFit: 'cover',
+    marginLeft: '0.7rem',
+    border: '2px solid #3498db',
   },
 };
 

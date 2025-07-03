@@ -303,6 +303,22 @@ app.get('/api/comments/recent', (req, res) => {
 });
 // --- COMMENTS FEATURE END ---
 
+// --- NEWS SEARCH FEATURE START ---
+app.get('/api/news/search', (req, res) => {
+  const { query } = req.query;
+  if (!query) return res.json([]);
+  const sql = `SELECT * FROM news WHERE title LIKE ? OR summary LIKE ? OR content LIKE ? ORDER BY created_at DESC`;
+  const likeQuery = `%${query}%`;
+  db.query(sql, [likeQuery, likeQuery, likeQuery], (err, results) => {
+    if (err) {
+      console.error('Error searching news:', err);
+      return res.status(500).json({ error: 'Error searching news' });
+    }
+    res.json(results);
+  });
+});
+// --- NEWS SEARCH FEATURE END ---
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
