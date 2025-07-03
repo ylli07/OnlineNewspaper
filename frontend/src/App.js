@@ -8,6 +8,7 @@ import Login from './pages/Login';
 import Signup from './components/Signup';
 import AdminDashboard from './pages/AdminDashboard';
 import ForgotPassword from './pages/ForgotPassword';
+import ManageAccount from './pages/ManageAccount';
 import './App.css';
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/account" element={<ManageAccount />} />
       </Routes>
     </Router>
   );

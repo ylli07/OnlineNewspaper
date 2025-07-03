@@ -161,13 +161,15 @@ export default function Home() {
             </div>
           </div>
           <div style={styles.newsGrid}>
-            {(searchResults !== null ? searchResults : news).filter(item => !item.gallery_order && !item.sports_order).map(({ id, title, summary, category }) => (
-              <div key={id} style={styles.newsBox}>
-                <h3 style={styles.title}>{title}</h3>
-                <p style={styles.category}>{category}</p>
-                <p>{summary}</p>
-              </div>
-            ))}
+            {(searchResults !== null ? searchResults : news)
+              .filter(item => !item.gallery_order && !item.sports_order)
+              .map(({ id, title, summary, category }) => (
+                <div key={id} style={styles.newsBox}>
+                  <h3 style={styles.title}>{title}</h3>
+                  <p style={styles.category}>{category}</p>
+                  <p>{summary}</p>
+                </div>
+              ))}
             {(searchResults !== null && searchResults.length === 0) && (
               <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '2rem', color: '#666' }}>
                 <p>No news found for your search.</p>
