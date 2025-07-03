@@ -87,21 +87,9 @@ export default function Sports() {
         <p>Write something about sports here...</p>
       </div>
       <div style={styles.newsGrid}>
-        {Array.isArray(news) ? news.filter(item => !item.gallery_order && !item.sports_order).map(({ id, title, summary, imageUrl, image_caption, image_url }) => (
+        {Array.isArray(news) ? news.filter(item => !item.gallery_order && !item.sports_order).map(({ id }) => (
           <div key={id} style={styles.newsCard}>
-            <div style={styles.imageContainer}>
-              <img 
-                src={image_url && image_url.startsWith('http') ? image_url : 'https://via.placeholder.com/600x350?text=No+Image'} 
-                alt={title}
-                style={styles.newsImage}
-              />
-              <div style={styles.imageCaption}>{image_caption}</div>
-            </div>
-            <div style={styles.content}>
-              <h2 style={styles.newsTitle}>{title}</h2>
-              <p style={styles.summary}>{summary}</p>
-            </div>
-            {/* Comments Section */}
+            {/* Comments Section Only */}
             <div style={{marginTop: '1em'}}>
               <h4>Comments</h4>
               <div>

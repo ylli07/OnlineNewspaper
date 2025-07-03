@@ -9,6 +9,9 @@ export default function Home() {
   const [gallery, setGallery] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  // Comments state
+  const [comments, setComments] = useState({});
+  const [commentInputs, setCommentInputs] = useState({});
 
   useEffect(() => {
     setLoading(true);
@@ -34,7 +37,7 @@ export default function Home() {
       })
       .then(data => {
         setNews(data);
-        // Filter out gallery items and sports items from featured news
+        // Filter out gallery and sports items
         const nonGalleryNews = data.filter(item => !item.gallery_order && !item.sports_order);
         setFeaturedNews(nonGalleryNews.slice(0, 3));
       })
@@ -72,6 +75,49 @@ export default function Home() {
       });
   }, []);
 
+  // Fetch comments for a news article
+  const fetchComments = async (newsId) => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/news/${newsId}/comments`);
+      if (!res.ok) {
+        setComments(prev => ({ ...prev, [newsId]: [] }));
+        return;
+      }
+      const data = await res.json();
+      setComments(prev => ({ ...prev, [newsId]: data }));
+    } catch (err) {
+      setComments(prev => ({ ...prev, [newsId]: [] }));
+    }
+  };
+
+  // Handle comment input change
+  const handleCommentInput = (newsId, value) => {
+    setCommentInputs(prev => ({ ...prev, [newsId]: value }));
+  };
+
+  // Handle comment submit
+  const handleCommentSubmit = async (newsId) => {
+    const text = commentInputs[newsId];
+    if (!text) return;
+    try {
+      await fetch(`http://localhost:5000/api/news/${newsId}/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user: 'Anonymous', text })
+      });
+      setCommentInputs(prev => ({ ...prev, [newsId]: '' }));
+      fetchComments(newsId);
+    } catch (err) {}
+  };
+
+  // Fetch comments for all news when news loads
+  useEffect(() => {
+    news.forEach(item => fetchComments(item.id));
+  }, [news]);
+
+  // Helper to get latest news (not gallery, not sports)
+  const latestNewsItems = news.filter(item => !item.gallery_order && !item.sports_order);
+
   return (
     <>
       {/* Navbar */}
@@ -88,11 +134,6 @@ export default function Home() {
         {/* Featured News Section */}
         <section style={styles.featuredSection}>
           <h2 style={styles.sectionTitle}>Featured Stories</h2>
-          <div style={{ textAlign: 'center', margin: '2rem 0' }}>
-            <span style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#2c3e50' }}>
-              Si ndikon ndryshimi i klimës në valët e nxehtësisë?
-            </span>
-          </div>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '2rem' }}>
             <img id="custom-featured-img" src={featured.image_url || 'https://via.placeholder.com/600x350?text=Foto+e+klimes'} alt="Custom Featured" style={{ width: '60%', maxWidth: 600, borderRadius: 10, marginBottom: 10 }} />
             <div style={{ width: '60%', maxWidth: 600, fontStyle: 'italic', color: '#555', textAlign: 'center' }}>
@@ -100,18 +141,27 @@ export default function Home() {
             </div>
           </div>
           <div style={styles.featuredGrid}>
-            {featuredNews.map(({ id, title, summary, category, imageUrl, image_caption, image_url }) => (
+            {featuredNews.map(({ id }) => (
               <div key={id} style={styles.featuredBox}>
-                <div style={styles.imageContainer}>
-                  <img 
-                    src={image_url || imageUrl || 'https://via.placeholder.com/400x250'} 
-                    alt={title}
-                    style={styles.featuredImage}
+                {/* Comments Section Only */}
+                <div style={{marginTop: '1em'}}>
+                  <h4>Comments</h4>
+                  <div>
+                    {(comments[id] || []).map(comment => (
+                      <div key={comment.id} style={{borderBottom: '1px solid #eee', marginBottom: '0.5em'}}>
+                        <b>{comment.user}:</b> {comment.text} <span style={{fontSize: '0.8em', color: '#888'}}>{new Date(comment.created_at).toLocaleString()}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Write a comment..."
+                    value={commentInputs[id] || ''}
+                    onChange={e => handleCommentInput(id, e.target.value)}
+                    style={{width: '80%'}}
                   />
-                  <div style={styles.imageCaption}>{image_caption}</div>
+                  <button onClick={() => handleCommentSubmit(id)} style={{marginLeft: '0.5em'}}>Submit</button>
                 </div>
-                <h3 style={styles.featuredTitle}>{title}</h3>
-                <p style={styles.category}>{category}</p>
               </div>
             ))}
           </div>
@@ -127,11 +177,27 @@ export default function Home() {
             </div>
           </div>
           <div style={styles.newsGrid}>
-            {news.filter(item => !item.gallery_order && !item.sports_order).map(({ id, title, summary, category }) => (
+            {latestNewsItems.map(({ id }) => (
               <div key={id} style={styles.newsBox}>
-                <h3 style={styles.title}>{title}</h3>
-                <p style={styles.category}>{category}</p>
-                <p>{summary}</p>
+                {/* Comments Section Only */}
+                <div style={{marginTop: '1em'}}>
+                  <h4>Comments</h4>
+                  <div>
+                    {(comments[id] || []).map(comment => (
+                      <div key={comment.id} style={{borderBottom: '1px solid #eee', marginBottom: '0.5em'}}>
+                        <b>{comment.user}:</b> {comment.text} <span style={{fontSize: '0.8em', color: '#888'}}>{new Date(comment.created_at).toLocaleString()}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Write a comment..."
+                    value={commentInputs[id] || ''}
+                    onChange={e => handleCommentInput(id, e.target.value)}
+                    style={{width: '80%'}}
+                  />
+                  <button onClick={() => handleCommentSubmit(id)} style={{marginLeft: '0.5em'}}>Submit</button>
+                </div>
               </div>
             ))}
           </div>
