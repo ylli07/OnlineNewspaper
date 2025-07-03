@@ -9,6 +9,8 @@ export default function Home() {
   const [gallery, setGallery] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchResults, setSearchResults] = useState(null);
 
   useEffect(() => {
     setLoading(true);
@@ -72,6 +74,24 @@ export default function Home() {
       });
   }, []);
 
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    if (!searchTerm.trim()) return;
+    try {
+      const res = await fetch(`http://localhost:5000/api/news/search?query=${encodeURIComponent(searchTerm)}`);
+      if (!res.ok) throw new Error('Search failed');
+      const data = await res.json();
+      setSearchResults(data);
+    } catch (err) {
+      setSearchResults([]);
+    }
+  };
+
+  const handleClearSearch = () => {
+    setSearchTerm('');
+    setSearchResults(null);
+  };
+
   return (
     <>
       {/* Navbar */}
@@ -85,6 +105,20 @@ export default function Home() {
 
       {/* Main content */}
       <main style={styles.main}>
+        {/* Search Bar */}
+        <form onSubmit={handleSearch} style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '2rem', marginRight: '2rem' }}>
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            placeholder="Search news..."
+            style={{ padding: '0.4rem', borderRadius: 4, border: '1px solid #ccc', width: 180, fontSize: '0.95rem', marginRight: 8 }}
+          />
+          <button type="submit" style={{ padding: '0.4rem 1rem', borderRadius: 4, border: 'none', background: '#3498db', color: 'white', fontWeight: 'bold', fontSize: '0.95rem', cursor: 'pointer' }}>Search</button>
+          {searchResults !== null && (
+            <button type="button" onClick={handleClearSearch} style={{ marginLeft: 8, padding: '0.4rem 1rem', borderRadius: 4, border: 'none', background: '#e74c3c', color: 'white', fontWeight: 'bold', fontSize: '0.95rem', cursor: 'pointer' }}>Clear</button>
+          )}
+        </form>
         {/* Featured News Section */}
         <section style={styles.featuredSection}>
           <h2 style={styles.sectionTitle}>Featured Stories</h2>
@@ -127,13 +161,18 @@ export default function Home() {
             </div>
           </div>
           <div style={styles.newsGrid}>
-            {news.filter(item => !item.gallery_order && !item.sports_order).map(({ id, title, summary, category }) => (
+            {(searchResults !== null ? searchResults : news).filter(item => !item.gallery_order && !item.sports_order).map(({ id, title, summary, category }) => (
               <div key={id} style={styles.newsBox}>
                 <h3 style={styles.title}>{title}</h3>
                 <p style={styles.category}>{category}</p>
                 <p>{summary}</p>
               </div>
             ))}
+            {(searchResults !== null && searchResults.length === 0) && (
+              <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '2rem', color: '#666' }}>
+                <p>No news found for your search.</p>
+              </div>
+            )}
           </div>
         </section>
 
