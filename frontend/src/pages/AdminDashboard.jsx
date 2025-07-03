@@ -17,6 +17,7 @@ const AdminDashboard = () => {
   const [showSportsContentEdit, setShowSportsContentEdit] = useState(false);
   const [editingSportsId, setEditingSportsId] = useState(null);
   const [newSportsItem, setNewSportsItem] = useState({ image_url: '', image_caption: '', sports_order: '' });
+  const [recentComments, setRecentComments] = useState([]);
 
   useEffect(() => {
     fetch('http://localhost:5000/api/featured')
@@ -174,6 +175,21 @@ const AdminDashboard = () => {
       });
   };
 
+  const fetchRecentComments = async () => {
+    const res = await fetch('http://localhost:5000/api/comments/recent');
+    const data = await res.json();
+    setRecentComments(data);
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    await fetch(`http://localhost:5000/api/comments/${commentId}`, { method: 'DELETE' });
+    fetchRecentComments();
+  };
+
+  useEffect(() => {
+    fetchRecentComments();
+  }, []);
+
   return (
     <div style={styles.container}>
       <button onClick={() => window.history.back()} style={styles.backButton}>←</button>
@@ -289,7 +305,16 @@ const AdminDashboard = () => {
         </section>
         <section style={styles.section}>
           <h2 style={styles.sectionTitle}>Manage Comments</h2>
-          {/* Comments Management will go here */}
+          <div style={{marginBottom: '2em'}}>
+            {recentComments.length === 0 ? <p>No recent comments.</p> : recentComments.map(comment => (
+              <div key={comment.id} style={{borderBottom: '1px solid #eee', marginBottom: '0.5em', paddingBottom: '0.5em'}}>
+                <b>{comment.user}</b> on news #{comment.news_id}:<br/>
+                {comment.text}
+                <span style={{fontSize: '0.8em', color: '#888', marginLeft: '1em'}}>{new Date(comment.created_at).toLocaleString()}</span>
+                <button style={{marginLeft: '1em', color: 'red'}} onClick={() => handleDeleteComment(comment.id)}>Delete</button>
+              </div>
+            ))}
+          </div>
         </section>
       </div>
     </div>

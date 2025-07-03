@@ -250,6 +250,59 @@ app.post('/api/sports-content', (req, res) => {
   });
 });
 
+// --- COMMENTS FEATURE START ---
+// Get comments for a news article
+app.get('/api/news/:newsId/comments', (req, res) => {
+  const { newsId } = req.params;
+  db.query('SELECT * FROM comments WHERE news_id = ? ORDER BY created_at DESC', [newsId], (err, results) => {
+    if (err) {
+      console.error('Error fetching comments:', err);
+      return res.status(500).json({ error: 'Error fetching comments' });
+    }
+    res.json(results);
+  });
+});
+
+// Add a comment to a news article
+app.post('/api/news/:newsId/comments', (req, res) => {
+  const { newsId } = req.params;
+  const { user, text } = req.body;
+  if (!user || !text) {
+    return res.status(400).json({ error: 'User and text are required' });
+  }
+  db.query('INSERT INTO comments (news_id, user, text, created_at) VALUES (?, ?, ?, NOW())', [newsId, user, text], (err, result) => {
+    if (err) {
+      console.error('Error adding comment:', err);
+      return res.status(500).json({ error: 'Error adding comment' });
+    }
+    res.json({ id: result.insertId, news_id: newsId, user, text, created_at: new Date() });
+  });
+});
+
+// Delete a comment (admin)
+app.delete('/api/comments/:commentId', (req, res) => {
+  const { commentId } = req.params;
+  db.query('DELETE FROM comments WHERE id = ?', [commentId], (err, result) => {
+    if (err) {
+      console.error('Error deleting comment:', err);
+      return res.status(500).json({ error: 'Error deleting comment' });
+    }
+    res.json({ success: true });
+  });
+});
+
+// Get the 10 most recent comments (admin dashboard)
+app.get('/api/comments/recent', (req, res) => {
+  db.query('SELECT * FROM comments ORDER BY created_at DESC LIMIT 10', (err, results) => {
+    if (err) {
+      console.error('Error fetching recent comments:', err);
+      return res.status(500).json({ error: 'Error fetching recent comments' });
+    }
+    res.json(results);
+  });
+});
+// --- COMMENTS FEATURE END ---
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

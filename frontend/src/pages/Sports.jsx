@@ -3,6 +3,8 @@ import React, { useEffect, useState } from 'react';
 export default function Sports() {
   const [news, setNews] = useState([]);
   const [sportsContent, setSportsContent] = useState([]);
+  const [comments, setComments] = useState({});
+  const [commentInputs, setCommentInputs] = useState({});
 
   useEffect(() => {
     fetch('http://localhost:5000/api/news?category=sports')
@@ -13,6 +15,43 @@ export default function Sports() {
       .then(res => res.json())
       .then(data => setSportsContent(data));
   }, []);
+
+  const fetchComments = async (newsId) => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/news/${newsId}/comments`);
+      if (!res.ok) {
+        setComments(prev => ({ ...prev, [newsId]: [] }));
+        return;
+      }
+      const data = await res.json();
+      setComments(prev => ({ ...prev, [newsId]: data }));
+    } catch (err) {
+      setComments(prev => ({ ...prev, [newsId]: [] }));
+    }
+  };
+
+  const handleCommentInput = (newsId, value) => {
+    setCommentInputs(prev => ({ ...prev, [newsId]: value }));
+  };
+
+  const handleCommentSubmit = async (newsId) => {
+    const text = commentInputs[newsId];
+    if (!text) return;
+    try {
+      await fetch(`http://localhost:5000/api/news/${newsId}/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user: 'Anonymous', text })
+      });
+      setCommentInputs(prev => ({ ...prev, [newsId]: '' }));
+      fetchComments(newsId);
+    } catch (err) {}
+  };
+
+  // Fetch comments when news loads
+  useEffect(() => {
+    news.forEach(item => fetchComments(item.id));
+  }, [news]);
 
   return (
     <div style={styles.container}>
@@ -52,7 +91,7 @@ export default function Sports() {
           <div key={id} style={styles.newsCard}>
             <div style={styles.imageContainer}>
               <img 
-                src={image_url || imageUrl || 'https://via.placeholder.com/600x350'} 
+                src={image_url && image_url.startsWith('http') ? image_url : 'https://via.placeholder.com/600x350?text=No+Image'} 
                 alt={title}
                 style={styles.newsImage}
               />
@@ -61,6 +100,25 @@ export default function Sports() {
             <div style={styles.content}>
               <h2 style={styles.newsTitle}>{title}</h2>
               <p style={styles.summary}>{summary}</p>
+            </div>
+            {/* Comments Section */}
+            <div style={{marginTop: '1em'}}>
+              <h4>Comments</h4>
+              <div>
+                {(comments[id] || []).map(comment => (
+                  <div key={comment.id} style={{borderBottom: '1px solid #eee', marginBottom: '0.5em'}}>
+                    <b>{comment.user}:</b> {comment.text} <span style={{fontSize: '0.8em', color: '#888'}}>{new Date(comment.created_at).toLocaleString()}</span>
+                  </div>
+                ))}
+              </div>
+              <input
+                type="text"
+                placeholder="Write a comment..."
+                value={commentInputs[id] || ''}
+                onChange={e => handleCommentInput(id, e.target.value)}
+                style={{width: '80%'}}
+              />
+              <button onClick={() => handleCommentSubmit(id)} style={{marginLeft: '0.5em'}}>Submit</button>
             </div>
           </div>
         )) : <p>No news found.</p>}
